@@ -4,30 +4,39 @@ icon: package
 color: yellow
 
 runs:
-  using: 'composite'
-  steps: 
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version-file: '.nvmrc'
-    - uses: pnpm/action-setup@v2
-      with:
-        run_install: false
-
-    - name: Get pnpm store directory
-      id: pnpm-cache
+  using: "composite"
+  steps:
+    - name: "Cleanup build folder"
       shell: bash
       run: |
-        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-    - uses: actions/cache@v3
-      name: Setup pnpm cache
+        ls -la ./
+        rm -rf ./* || true
+        rm -rf ./.??* || true
+        ls -la ./
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
-        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+        node-version-file: ".nvmrc"
 
-    - run: pnpm install --frozen-lockfile
-      shell: bash
-      
+    - uses: pnpm/action-setup@v3
+      with:
+        run_install: |
+          - recursive: true
+            args: [--frozen-lockfile]
+
+    # - name: Get pnpm store directory
+    #   id: pnpm-cache
+    #   shell: bash
+    #   run: |
+    #     echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    # - uses: actions/cache@v3
+    #   name: Setup pnpm cache
+    #   with:
+    #     path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+    #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-pnpm-store-
+
+    # - run: pnpm install --frozen-lockfile
+    #   shell: bash
